@@ -12,7 +12,7 @@ from agents import Agent, Runner, trace, OpenAIResponsesModel
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
-from .cli import octagon_client
+from agents_mcp_server.cli import octagon_client
 
 FRED_WILSON_PROFILE = (Path(__file__).parent / "investors/fred_wilson.md").read_text()
 PETER_THIEL_PROFILE = (Path(__file__).parent / "investors/peter_thiel.md").read_text()

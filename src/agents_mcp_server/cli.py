@@ -146,6 +146,14 @@ def install() -> None:
         octagon_api_key = getpass.getpass("Enter your Octagon API key: ")
     env_dict["OCTAGON_API_KEY"] = octagon_api_key
 
+    # Add Octagon Base URL
+    octagon_base_url = os.environ.get("OCTAGON_BASE_URL", "")
+    default_url = "https://api-gateway.octagonagents.com/v1"
+    while not octagon_base_url:
+        user_input = getpass.getpass(f"Enter Octagon Base URL [default: {default_url}]: ")
+        octagon_base_url = user_input or default_url
+    env_dict["OCTAGON_BASE_URL"] = octagon_base_url
+
     uv = which("uvx", path=env_dict["PATH"])
     command = uv if uv else "uvx"
     args = [name]
@@ -161,7 +169,7 @@ def get_octagon_client() -> AsyncOpenAI:
     """Initialize and return Octagon client with current environment variables"""
     return AsyncOpenAI(
         api_key=os.environ["OCTAGON_API_KEY"],
-        base_url=os.environ["OCTAGON_API_BASE_URL"]
+        base_url=os.environ.get("OCTAGON_BASE_URL", "https://api-gateway.octagonagents.com/v1")
     )
 
 octagon_client = get_octagon_client()

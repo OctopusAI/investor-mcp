@@ -15,6 +15,10 @@ startCommand:
       octagonApiKey:
         type: string
         description: Your Octagon API key.
+      octagonBaseUrl:
+        type: string
+        default: "https://api-gateway.octagonagents.com/v1"
+        description: Base URL for Octagon API endpoints.
       mcpTransport:
         type: string
         default: stdio
@@ -28,10 +32,12 @@ startCommand:
       env: {
         OPENAI_API_KEY: config.openaiApiKey,
         OCTAGON_API_KEY: config.octagonApiKey,
+        OCTAGON_BASE_URL: config.octagonBaseUrl,
         MCP_TRANSPORT: config.mcpTransport
       }
     })
   exampleConfig:
     openaiApiKey: sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     octagonApiKey: oct_XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    octagonBaseUrl: "https://api-gateway.octagonagents.com/v1"
     mcpTransport: stdio

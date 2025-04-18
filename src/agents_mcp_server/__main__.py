@@ -12,14 +12,21 @@ from .server import mcp
 
 def main() -> None:
     """Run the MCP server."""
-    # Check required environment variables
+    # Check if the OpenAI API key is set
     if not os.environ.get("OPENAI_API_KEY"):
         print("Error: OPENAI_API_KEY environment variable is not set.")
         print("Please set it before running the server.")
         sys.exit(1)
-        
+
+    # Check if the Octagon API key is set
     if not os.environ.get("OCTAGON_API_KEY"):
         print("Error: OCTAGON_API_KEY environment variable is not set.")
+        print("Please set it before running the server.")
+        sys.exit(1)
+    
+    # Check if the Octagon API base URL is set
+    if not os.environ.get("OCTAGON_BASE_URL"):
+        print("Error: OCTAGON_BASE_URL environment variable is not set.")
         print("Please set it before running the server.")
         sys.exit(1)
 
