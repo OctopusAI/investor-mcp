@@ -140,17 +140,6 @@ def install() -> None:
 
     env_dict["OPENAI_API_KEY"] = api_key
 
-    # Add Octagon API credentials
-    octagon_api_key = os.environ.get("OCTAGON_API_KEY", "")
-    if not octagon_api_key:
-        octagon_api_key = getpass.getpass("Enter your Octagon API key: ")
-    
-    octagon_api_base_url = os.environ.get("OCTAGON_API_BASE_URL", "")
-    if not octagon_api_base_url:
-        octagon_api_base_url = input("Enter your Octagon API base URL: ")
-
-    env_dict["OCTAGON_API_KEY"] = octagon_api_key
-    env_dict["OCTAGON_API_BASE_URL"] = octagon_api_base_url
 
     uv = which("uvx", path=env_dict["PATH"])
     command = uv if uv else "uvx"
