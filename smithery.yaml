@@ -7,10 +7,14 @@ startCommand:
     type: object
     required:
       - openaiApiKey
+      - octagonApiKey
     properties:
       openaiApiKey:
         type: string
         description: Your OpenAI API key.
+      octagonApiKey:
+        type: string
+        description: Your Octagon API key.
       mcpTransport:
         type: string
         default: stdio
@@ -23,9 +27,11 @@ startCommand:
       args: [],
       env: {
         OPENAI_API_KEY: config.openaiApiKey,
+        OCTAGON_API_KEY: config.octagonApiKey,
         MCP_TRANSPORT: config.mcpTransport
       }
     })
   exampleConfig:
     openaiApiKey: sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    octagonApiKey: oct_XXXXXXXXXXXXXXXXXXXXXXXXXXXX
     mcpTransport: stdio

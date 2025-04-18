@@ -140,6 +140,11 @@ def install() -> None:
 
     env_dict["OPENAI_API_KEY"] = api_key
 
+    # Add Octagon API key
+    octagon_api_key = os.environ.get("OCTAGON_API_KEY", "")
+    while not octagon_api_key:
+        octagon_api_key = getpass.getpass("Enter your Octagon API key: ")
+    env_dict["OCTAGON_API_KEY"] = octagon_api_key
 
     uv = which("uvx", path=env_dict["PATH"])
     command = uv if uv else "uvx"
