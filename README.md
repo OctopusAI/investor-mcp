@@ -3,6 +3,10 @@
 
 A Model Context Protocol (MCP) server that exposes AI-powered investor agent simulations through the MCP protocol, augmented with Octagon Private Markets data.
 
+<a href="https://glama.ai/mcp/servers/@OctopusAI/investor-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@OctopusAI/investor-mcp/badge" alt="Investor Persona Server MCP server" />
+</a>
+
 ## Features
 
 ### Individual Investor Personas
