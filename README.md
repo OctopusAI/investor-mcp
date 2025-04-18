@@ -1,7 +1,7 @@
-# Investor Persona MCP Server
-[![smithery badge](https://smithery.ai/badge/@lroolle/openai-agents-mcp-server)](https://smithery.ai/server/@lroolle/openai-agents-mcp-server)
+# Octagon Investor MCP Server
+[![smithery badge](https://smithery.ai/badge/@octagonai/investor-mcp-server)](https://smithery.ai/server/@octagonai/investor-mcp-server)
 
-A Model Context Protocol (MCP) server that exposes AI-powered investor persona simulations through the MCP protocol.
+A Model Context Protocol (MCP) server that exposes AI-powered investor agent simulations through the MCP protocol, augmented with Octagon Private Markets data.
 
 ## Features
 
@@ -10,9 +10,9 @@ A Model Context Protocol (MCP) server that exposes AI-powered investor persona s
 - **Fred Wilson (Union Square Ventures)**: Simulation of the NYC-based VC known for community-driven ventures
 - **Peter Thiel (Founders Fund)**: Simulation of the contrarian investor focused on disruptive technologies
 
-### Multi-Persona Orchestrator
+### Octagon Private Markets Data Agents
 
-- **Persona Orchestrator**: Intelligent agent that routes questions to appropriate investor personas and explains their rationale
+- **Private Market Agents**: Provides private markets data
 
 ## Installation
 

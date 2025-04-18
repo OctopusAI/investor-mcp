@@ -33,34 +33,29 @@ class AgentResponse(BaseModel):
 
 
 # --- Octagon Private Market Agents (shared across Investors) ---
-companies_agent = Agent(
+octagon_companies_agent = Agent(
     name="Companies Agent",
     instructions="Retrieve detailed company information from Octagon's companies database.",
     model=OpenAIResponsesModel(model="octagon-companies-agent", openai_client=octagon_client),
     tools=[],
 )
 
-funding_agent = Agent(
+octagon_funding_agent = Agent(
     name="Funding Agent",
     instructions="Retrieve detailed funding information from Octagon's companies database.",
     model=OpenAIResponsesModel(model="octagon-funding-agent", openai_client=octagon_client),
     tools=[],
 )
 
-investors_agent = Agent(
+octagon_investors_agent = Agent(
     name="Investors Agent",
     instructions="Retrieve detailed investor information from Octagon's investors database.",
     model=OpenAIResponsesModel(model="octagon-investors-agent", openai_client=octagon_client),
     tools=[],
 )
 
-company_report_agent = Agent(
-    name="Company Report Agent",
-    instructions="Retrieve detailed company information from Octagon's companies database.",
-    tools=[],
-)
 
-# --- Fred Wilson Agent ---
+# --- OctagonFred Wilson Agent ---
 @mcp.tool(
     name="octagon-fred-wilson-agent",
     description="You are Fred Wilson. Provides analysis and answers using Fred's investment philosophy.",
@@ -70,15 +65,15 @@ async def fred_wilson_orchestrator(
 ) -> AgentResponse:
     try:
         with trace("Fetch company data for Fred"):
-            company_result = await Runner.run(companies_agent, query)
+            company_result = await Runner.run(octagon_companies_agent, query)
             company_info = company_result.final_output
 
         with trace("Fetch funding data for Fred"):
-            funding_result = await Runner.run(funding_agent, query)
+            funding_result = await Runner.run(octagon_funding_agent, query)
             funding_info = funding_result.final_output
 
         with trace("Fetch investor data for Fred"):
-            investor_result = await Runner.run(investors_agent, query)
+            investor_result = await Runner.run(octagon_investors_agent, query)
             investor_info = investor_result.final_output
 
         combined_context = f"""
@@ -117,7 +112,7 @@ async def fred_wilson_orchestrator(
         )
 
 
-# --- Peter Thiel Agent ---
+# --- OctagonPeter Thiel Agent ---
 @mcp.tool(
     name="octagon-peter-thiel-agent",
     description="You are Peter Thiel. Provides analysis and answers using Peter's investment philosophy.",
@@ -127,15 +122,15 @@ async def peter_thiel_orchestrator(
 ) -> AgentResponse:
     try:
         with trace("Fetch company data for Peter"):
-            company_result = await Runner.run(companies_agent, query)
+            company_result = await Runner.run(octagon_companies_agent, query)
             company_info = company_result.final_output
 
         with trace("Fetch funding data for Peter"):
-            funding_result = await Runner.run(funding_agent, query)
+            funding_result = await Runner.run(octagon_funding_agent, query)
             funding_info = funding_result.final_output
 
         with trace("Fetch investor data for Peter"):
-            investor_result = await Runner.run(investors_agent, query)
+            investor_result = await Runner.run(octagon_investors_agent, query)
             investor_info = investor_result.final_output
 
         combined_context = f"""
