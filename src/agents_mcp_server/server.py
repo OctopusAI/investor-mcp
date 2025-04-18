@@ -1,7 +1,8 @@
 """
 Octagon Investor MCP server with handoff-driven chain-of-thought orchestration.
 
-Fred Wilson and Peter Thiel orchestrate their analysis using tool handoffs to domain-specific agents.
+Fred Wilson and Peter Thiel orchestrate their analysis using tool handoffs to domain-specific agents,
+with persistent memory, comparison capabilities, and traceable reasoning.
 """
 
 import asyncio
@@ -16,6 +17,7 @@ from agents import (
     handoff,
     RunHooks,
     RunContextWrapper,
+    AgentMemory,
     OpenAIResponsesModel,
 )
 from mcp.server.fastmcp import FastMCP
@@ -27,19 +29,19 @@ from agents_mcp_server.cli import octagon_client
 FRED_WILSON_PROFILE = (Path(__file__).parent / "investors/fred_wilson.md").read_text()
 PETER_THIEL_PROFILE = (Path(__file__).parent / "investors/peter_thiel.md").read_text()
 
-# --- Define Shared Context ---
+# --- Shared Context + Memory ---
 @dataclass
 class InvestorContext:
     query: str
     user_id: Optional[str] = None
 
+memory = AgentMemory()
 
-# --- Initialize MCP ---
+# --- MCP Initialization ---
 mcp = FastMCP(
     name="OpenAI Agents",
     instructions="""This MCP server provides access to Investor agents through the Model Context Protocol.""",
 )
-
 
 # --- Response Schema ---
 class AgentResponse(BaseModel):
@@ -48,8 +50,7 @@ class AgentResponse(BaseModel):
         None, description="The raw response data from the agent, if available"
     )
 
-
-# --- Lifecycle Hooks for Logging ---
+# --- Logging Hooks ---
 class InvestorHooks(RunHooks[InvestorContext]):
     async def on_handoff(self, context: RunContextWrapper[InvestorContext], from_agent, to_agent):
         print(f"🔁 Handoff from {from_agent.name} to {to_agent.name}")
@@ -61,7 +62,7 @@ class InvestorHooks(RunHooks[InvestorContext]):
         print(f"✅ Finished agent: {agent.name}")
 
 
-# --- Core Domain Agents ---
+# --- Domain-Specific Agents ---
 companies_agent = Agent(
     name="Companies Agent",
     instructions="Retrieve detailed company information from Octagon's companies database.",
@@ -81,7 +82,7 @@ investors_agent = Agent(
 )
 
 
-# --- Handoff Tools ---
+# --- Handoff Tool Definitions ---
 company_handoff = handoff(
     agent=companies_agent,
     tool_name_override="transfer_to_company_agent",
@@ -125,11 +126,13 @@ Follow this process:
             hooks=InvestorHooks(),
         )
 
-        result = await Runner.run(
-            starting_agent=fred_agent,
-            input=query,
-            context=context,
-        )
+        with trace("Fred Wilson orchestrator execution"):
+            result = await Runner.run(
+                starting_agent=fred_agent,
+                input=query,
+                context=context,
+                memory=memory,
+            )
 
         return AgentResponse(
             response=result.final_output,
@@ -168,11 +171,13 @@ Approach:
             hooks=InvestorHooks(),
         )
 
-        result = await Runner.run(
-            starting_agent=peter_agent,
-            input=query,
-            context=context,
-        )
+        with trace("Peter Thiel orchestrator execution"):
+            result = await Runner.run(
+                starting_agent=peter_agent,
+                input=query,
+                context=context,
+                memory=memory,
+            )
 
         return AgentResponse(
             response=result.final_output,
@@ -183,5 +188,70 @@ Approach:
         print(f"Error in Peter Thiel Orchestrator: {e}")
         return AgentResponse(
             response=f"An error occurred while processing Peter's analysis: {str(e)}",
+            raw_response=None,
+        )
+
+
+# --- Compare Investor Opinions Tool ---
+@mcp.tool(
+    name="compare_investors",
+    description="Ask both Fred Wilson and Peter Thiel the same investment question and compare their perspectives.",
+)
+async def compare_investors(
+    query: str = Field(..., description="The investment-related question or scenario."),
+) -> AgentResponse:
+    try:
+        context = InvestorContext(query=query)
+
+        with trace("Run Fred Wilson"):
+            fred_result = await Runner.run(
+                starting_agent=Agent[InvestorContext](
+                    name="Fred Wilson",
+                    instructions=FRED_WILSON_PROFILE,
+                    tools=[company_handoff, funding_handoff, investor_handoff],
+                    hooks=InvestorHooks(),
+                ),
+                input=query,
+                context=context,
+                memory=memory,
+            )
+
+        with trace("Run Peter Thiel"):
+            peter_result = await Runner.run(
+                starting_agent=Agent[InvestorContext](
+                    name="Peter Thiel",
+                    instructions=PETER_THIEL_PROFILE,
+                    tools=[company_handoff, funding_handoff, investor_handoff],
+                    hooks=InvestorHooks(),
+                ),
+                input=query,
+                context=context,
+                memory=memory,
+            )
+
+        with trace("Synthesizing comparison"):
+            combined_summary = f"""📊 **Fred Wilson's Perspective:**
+{fred_result.final_output}
+
+🚀 **Peter Thiel's Perspective:**
+{peter_result.final_output}
+
+🤔 **Key Differences:**
+- Fred may focus more on community, network effects, and long-term viability.
+- Peter may emphasize breakthrough tech, monopoly potential, and contrarian theses.
+"""
+
+        return AgentResponse(
+            response=combined_summary,
+            raw_response={
+                "fred": fred_result.final_output,
+                "peter": peter_result.final_output,
+            },
+        )
+
+    except Exception as e:
+        print(f"Error comparing investors: {e}")
+        return AgentResponse(
+            response=f"An error occurred during investor comparison: {str(e)}",
             raw_response=None,
         )
