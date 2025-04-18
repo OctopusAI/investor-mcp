@@ -21,6 +21,7 @@ A Model Context Protocol (MCP) server that exposes AI-powered investor persona s
 - Python 3.11+
 - [uv](https://github.com/astral-sh/uv) package manager
 - OpenAI API key
+- Octagon API key
 
 ### Install via Smithery
 
@@ -36,7 +37,9 @@ npx -y @smithery/cli install @lroolle/openai-agents-mcp-server --client claude
     "command": "uvx",
     "args": ["investor-persona-mcp-server"],
     "env": {
-        "OPENAI_API_KEY": "your-api-key-here"
+        "OPENAI_API_KEY": "your-openai-key-here",
+        "OCTAGON_API_KEY": "your-octagon-key-here",
+        "OCTAGON_BASE_URL": "https://api-gateway.octagonagents.com/v1"
     }
   }
 }
@@ -63,6 +66,8 @@ Investor personas are defined through markdown files containing:
 
 Environment variables:
 - `OPENAI_API_KEY`: Required for AI model access
+- `OCTAGON_API_KEY`: Required for Octagon API access  
+- `OCTAGON_BASE_URL`: Base URL for Octagon API (default: "https://api-gateway.octagonagents.com/v1")
 - `MCP_TRANSPORT`: Transport protocol (default: "stdio")
 - `PERSONAS_DIR`: Path to investor profiles (default: "./investors")
 
@@ -79,7 +84,8 @@ source .venv/bin/activate
 uv sync --dev
 
 # Run with SSE transport
-export OPENAI_API_KEY=your-key
+export OPENAI_API_KEY=your-openai-key
+export OCTAGON_API_KEY=your-octagon-key
 uv run mcp dev src/agents_mcp_server/server.py
 ```
 
