@@ -2,7 +2,7 @@ import asyncio
 from typing import Any, Dict, Optional
 from pathlib import Path
 
-from agents import Agent, Runner, trace, OpenAIResponsesModel
+from agents import Agent, Runner, trace, OpenAIResponsesModel, ModelSettings
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
@@ -46,6 +46,7 @@ octagon_funding_agent = Agent(
 fred_wilson_agent = Agent(
     name="Fred Wilson (Union Square Ventures)",
     instructions=FRED_WILSON_PROFILE,
+    model_settings=ModelSettings(tool_choice="required"),
     model=OpenAIResponsesModel(model="octagon-investors-agent", openai_client=octagon_client),
     tools=[
         octagon_companies_agent.as_tool(
@@ -67,6 +68,7 @@ fred_wilson_agent = Agent(
 peter_thiel_agent = Agent(
     name="Peter Thiel (Founders Fund)",
     instructions=PETER_THIEL_PROFILE,
+    model_settings=ModelSettings(tool_choice="required"),
     model=OpenAIResponsesModel(model="octagon-investors-agent", openai_client=octagon_client),
     tools=[
         octagon_companies_agent.as_tool(
@@ -77,8 +79,8 @@ peter_thiel_agent = Agent(
             tool_name="octagon_investors_agent",
             tool_description="Provides information about other investors and their investment history."
         ),
-        funding_info_agent.as_tool(
-            tool_name="funding_info_agent",
+        octagon_funding_agent.as_tool(
+            tool_name="octagon_funding_agent",
             tool_description="Provides information about funding rounds and financial data."
         ),
     ],
