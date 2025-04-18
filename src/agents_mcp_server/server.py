@@ -2,7 +2,7 @@
 Octagon Investor MCP server with handoff-driven chain-of-thought orchestration.
 
 Fred Wilson and Peter Thiel orchestrate their analysis using tool handoffs to domain-specific agents,
-with persistent memory, comparison capabilities, and traceable reasoning.
+with comparison capabilities and traceable reasoning.
 """
 
 import asyncio
@@ -17,7 +17,6 @@ from agents import (
     handoff,
     RunHooks,
     RunContextWrapper,
-    AgentMemory,
     OpenAIResponsesModel,
 )
 from mcp.server.fastmcp import FastMCP
@@ -29,13 +28,11 @@ from agents_mcp_server.cli import octagon_client
 FRED_WILSON_PROFILE = (Path(__file__).parent / "investors/fred_wilson.md").read_text()
 PETER_THIEL_PROFILE = (Path(__file__).parent / "investors/peter_thiel.md").read_text()
 
-# --- Shared Context + Memory ---
+# --- Shared Context (no memory) ---
 @dataclass
 class InvestorContext:
     query: str
     user_id: Optional[str] = None
-
-memory = AgentMemory()
 
 # --- MCP Initialization ---
 mcp = FastMCP(
@@ -131,7 +128,6 @@ Follow this process:
                 starting_agent=fred_agent,
                 input=query,
                 context=context,
-                memory=memory,
             )
 
         return AgentResponse(
@@ -176,7 +172,6 @@ Approach:
                 starting_agent=peter_agent,
                 input=query,
                 context=context,
-                memory=memory,
             )
 
         return AgentResponse(
@@ -213,7 +208,6 @@ async def compare_investors(
                 ),
                 input=query,
                 context=context,
-                memory=memory,
             )
 
         with trace("Run Peter Thiel"):
@@ -226,7 +220,6 @@ async def compare_investors(
                 ),
                 input=query,
                 context=context,
-                memory=memory,
             )
 
         with trace("Synthesizing comparison"):
