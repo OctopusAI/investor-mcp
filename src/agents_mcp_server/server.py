@@ -55,11 +55,21 @@ companies_agent = Agent(
     tools=[],
 )
 
+funding_agent = Agent(
+    name="Octagon Funding Agent",
+    instructions="Retrieve detailed funding information from Octagon's companies database.",
+    model=OpenAIResponsesModel(model="octagon-funding-agent", openai_client=octagon_client),
+    tools=[],
+)
+
+
 company_report_agent = Agent(
     name="Company Report Agent",
     instructions=f"Retrieve detailed company information from Octagon's companies database. Fill in the company report sheet: {COMPANY_REPORT_SHEET}",
     tools=[],
 )
+
+
 
 # --- Updated Investor Persona Agent ---
 @mcp.tool(
@@ -80,14 +90,14 @@ async def investor_persona_agent(
                 raw_response={"error": "Invalid investor selection"}
             )
 
-        # First get company research data
+        # Step 1: Company research
         with trace("Company research"):
             company_result = await Runner.run(companies_agent, query)
-            research_data = company_result.final_output
+            company_data = company_result.final_output
 
-        # Generate formatted company report from the research data
-        with trace("Company report generation"):
-            report_prompt = f"""
+        # Step 2: Initial company report
+        with trace("Initial company report"):
+            initial_report_prompt = f"""
 You have been given company research data retrieved from Octagon.
 
 Use the following template to generate a structured company report:
@@ -95,16 +105,41 @@ Use the following template to generate a structured company report:
 {COMPANY_REPORT_SHEET}
 
 Company Research Data:
-{research_data}
+{company_data}
 """
-            report_result = await Runner.run(company_report_agent, report_prompt)
-            formatted_report = report_result.final_output
+            initial_report_result = await Runner.run(company_report_agent, initial_report_prompt)
+            partial_report = initial_report_result.final_output
 
-        # Determine selected investor and prepare analysis query
+        # Step 3: Funding research
+        with trace("Funding research"):
+            funding_result = await Runner.run(funding_agent, query)
+            funding_data = funding_result.final_output
+
+        # Step 4: Augment report with funding data
+        with trace("Final company report with funding"):
+            final_report_prompt = f"""
+You are provided with a partially completed company report and new funding data.
+
+Update and complete the report using this additional information:
+
+--- Existing Report ---
+{partial_report}
+
+--- Funding Data ---
+{funding_data}
+
+Use the following template for consistency:
+
+{COMPANY_REPORT_SHEET}
+"""
+            final_report_result = await Runner.run(company_report_agent, final_report_prompt)
+            final_report = final_report_result.final_output
+
+        # Step 5: Prepare investor analysis input
         selected_investor = None
         tools = []
         analysis_query = f"""Company Report:
-{formatted_report}
+{final_report}
 
 Investment Analysis Request:
 {query}"""
@@ -140,14 +175,14 @@ Guidelines:
             tools=tools,
         )
 
-        with trace("Single investor agent execution"):
+        with trace("Investor analysis execution"):
             result = await Runner.run(investor_agent, analysis_query)
 
         return AgentResponse(
             response=result.final_output,
             raw_response={
                 "investor": selected_investor,
-                "company_report": formatted_report,
+                "final_report": final_report,
                 "items": [str(item) for item in result.new_items],
             },
         )
@@ -158,3 +193,4 @@ Guidelines:
             response=f"An error occurred while processing your request: {str(e)}", 
             raw_response=None
         )
+
