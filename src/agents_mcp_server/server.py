@@ -1,8 +1,7 @@
 """
 Octagon Investor MCP server with handoff-driven chain-of-thought orchestration.
 
-Fred Wilson and Peter Thiel orchestrate their analysis using tool handoffs to domain-specific agents,
-with traceable reasoning.
+Fred Wilson and Peter Thiel orchestrate their analysis using tool handoffs to domain-specific agents.
 """
 
 import asyncio
@@ -28,17 +27,19 @@ from agents_mcp_server.cli import octagon_client
 FRED_WILSON_PROFILE = (Path(__file__).parent / "investors/fred_wilson.md").read_text()
 PETER_THIEL_PROFILE = (Path(__file__).parent / "investors/peter_thiel.md").read_text()
 
-# --- Shared Context ---
+# --- Define Shared Context ---
 @dataclass
 class InvestorContext:
     query: str
     user_id: Optional[str] = None
 
-# --- MCP Initialization ---
+
+# --- Initialize MCP ---
 mcp = FastMCP(
     name="OpenAI Agents",
     instructions="""This MCP server provides access to Investor agents through the Model Context Protocol.""",
 )
+
 
 # --- Response Schema ---
 class AgentResponse(BaseModel):
@@ -47,7 +48,8 @@ class AgentResponse(BaseModel):
         None, description="The raw response data from the agent, if available"
     )
 
-# --- Logging Hooks ---
+
+# --- Lifecycle Hooks for Logging ---
 class InvestorHooks(RunHooks[InvestorContext]):
     async def on_handoff(self, context: RunContextWrapper[InvestorContext], from_agent, to_agent):
         print(f"🔁 Handoff from {from_agent.name} to {to_agent.name}")
@@ -59,7 +61,7 @@ class InvestorHooks(RunHooks[InvestorContext]):
         print(f"✅ Finished agent: {agent.name}")
 
 
-# --- Domain-Specific Agents ---
+# --- Core Domain Agents ---
 companies_agent = Agent(
     name="Companies Agent",
     instructions="Retrieve detailed company information from Octagon's companies database.",
@@ -79,7 +81,7 @@ investors_agent = Agent(
 )
 
 
-# --- Handoff Tool Definitions ---
+# --- Handoff Tools ---
 company_handoff = handoff(
     agent=companies_agent,
     tool_name_override="transfer_to_company_agent",
@@ -123,12 +125,11 @@ Follow this process:
             hooks=InvestorHooks(),
         )
 
-        with trace("Fred Wilson orchestrator execution"):
-            result = await Runner.run(
-                starting_agent=fred_agent,
-                input=query,
-                context=context,
-            )
+        result = await Runner.run(
+            starting_agent=fred_agent,
+            input=query,
+            context=context,
+        )
 
         return AgentResponse(
             response=result.final_output,
@@ -167,12 +168,11 @@ Approach:
             hooks=InvestorHooks(),
         )
 
-        with trace("Peter Thiel orchestrator execution"):
-            result = await Runner.run(
-                starting_agent=peter_agent,
-                input=query,
-                context=context,
-            )
+        result = await Runner.run(
+            starting_agent=peter_agent,
+            input=query,
+            context=context,
+        )
 
         return AgentResponse(
             response=result.final_output,
