@@ -12,7 +12,6 @@ from agents import Agent, Runner, trace, OpenAIResponsesModel
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
-from .cli import octagon_client
 
 FRED_WILSON_PROFILE = (Path(__file__).parent / "investors/fred_wilson.md").read_text()
 PETER_THIEL_PROFILE = (Path(__file__).parent / "investors/peter_thiel.md").read_text()
@@ -47,12 +46,6 @@ pieter_thiel_agent = Agent(
     tools=[],
 )
 
-companies_agent = Agent(
-    name="Companies Agent",
-    instructions="Retrieve detailed company information from Octagon's companies database.",
-    model=OpenAIResponsesModel(model="octagon-companies-agent", openai_client=octagon_client),
-    tools=[],
-)
 
 
 # --- Updated Investor Persona Agent ---
@@ -75,19 +68,12 @@ async def investor_persona_agent(
             )
 
         # First get company research data
-        with trace("Company research"):
-            company_result = await Runner.run(companies_agent, query)
-            research_data = company_result.final_output
+      
 
         # Determine selected investor and prepare analysis query
         selected_investor = None
         tools = []
-        analysis_query = f"""Company Research Data:
-        {research_data}
-
-        Investment Analysis Request:
-        {query}"""
-
+       
 
         # Determine selected investor
         selected_investor = None
@@ -125,7 +111,7 @@ async def investor_persona_agent(
         )
 
         with trace("Single investor agent execution"):
-            result = await Runner.run(investor_agent, analysis_query)
+            result = await Runner.run(investor_agent, query)
 
         return AgentResponse(
             response=result.final_output,

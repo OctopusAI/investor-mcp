@@ -162,14 +162,6 @@ def install() -> None:
         console.print(f"[bold red]Error:[/] Failed to install {name} in Claude app")
         sys.exit(1)
 
-def get_octagon_client() -> AsyncOpenAI:
-    """Initialize and return Octagon client with current environment variables"""
-    return AsyncOpenAI(
-        api_key=os.environ["OCTAGON_API_KEY"],
-        base_url=os.environ["OCTAGON_API_BASE_URL"]
-    )
-
-octagon_client = get_octagon_client()
 
 
 if __name__ == "__main__":
