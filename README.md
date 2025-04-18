@@ -19,14 +19,14 @@ A Model Context Protocol (MCP) server that exposes AI-powered investor persona s
 ### Prerequisites
 
 - Python 3.11+
-- [uv](https://github.com/astral-sh/uv) package manager
+- [uv](https://github.com/octagonai/investor-mcp-server) package manager
 - OpenAI API key
 - Octagon API key
 
 ### Install via Smithery
 
 ```bash
-npx -y @smithery/cli install @lroolle/openai-agents-mcp-server --client claude
+npx -y @smithery/cli install @octagonai/investor-mcp-server --client claude
 ```
 
 ### Claude Desktop Configuration
@@ -75,7 +75,7 @@ Environment variables:
 
 ```bash
 # Clone repo
-git clone https://github.com/lroolle/investor-persona-mcp-server.git
+git clone https://github.com/octagonai/investor-mcp-server.git
 cd investor-persona-mcp-server
 
 # Setup environment
