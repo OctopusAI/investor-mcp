@@ -1,5 +1,5 @@
 """
-Command-line interface for the agentstool-mcp-server.
+Command-line interface for the investor-mcp-server.
 
 This module provides a command-line interface for running and installing the MCP server.
 """
@@ -102,7 +102,7 @@ def update_claude_config(
 
 @app.command()
 def run() -> None:
-    """Run the OpenAI Agents Tool MCP server."""
+    """Run the Octagon Investor Agents Tool MCP server."""
     from . import main
 
     main()
