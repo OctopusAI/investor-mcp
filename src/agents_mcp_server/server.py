@@ -19,32 +19,71 @@ mcp = FastMCP(
 )
 
 # Define the companies agent
-companies_agent = Agent(
+octagon_companies_agent = Agent(
     name="Companies Agent",
     instructions="Retrieve detailed company information from Octagon's companies database.",
     model=OpenAIResponsesModel(model="octagon-companies-agent", openai_client=octagon_client),
     tools=[],
 )
 
-# Define the Fred Wilson agent with access to the companies agent
+# Define the investors info agent
+octagon_investors_agent = Agent(
+    name="Investors Info Agent",
+    instructions="Provides information about other investors and their investment history.",
+    model=OpenAIResponsesModel(model="octagon-investors-agent", openai_client=octagon_client),
+    tools=[],
+)
+
+# Define the funding info agent
+octagon_funding_agent = Agent(
+    name="Funding Info Agent",
+    instructions="Provides information about funding rounds and financial data.",
+    model=OpenAIResponsesModel(model="octagon-funding-agent", openai_client=octagon_client),
+    tools=[],
+)
+
+# Define the Fred Wilson agent with access to the additional agents
 fred_wilson_agent = Agent(
     name="Fred Wilson (Union Square Ventures)",
     instructions=FRED_WILSON_PROFILE,
-    tools=[companies_agent.as_tool(
-        tool_name="companies_agent",
-        tool_description="Provides detailed company information from Octagon's database."
-    )],
+    model=OpenAIResponsesModel(model="octagon-investors-agent", openai_client=octagon_client),
+    tools=[
+        octagon_companies_agent.as_tool(
+            tool_name="octagon_companies_agent",
+            tool_description="Provides detailed company information from Octagon's database."
+        ),
+        octagon_investors_agent.as_tool(
+            tool_name="octagon_investors_agent",
+            tool_description="Provides information about other investors and their investment history."
+        ),
+        octagon_funding_agent.as_tool(
+            tool_name="octagon_funding_agent",
+            tool_description="Provides information about funding rounds and financial data."
+        ),
+    ],
 )
 
-# Define the Peter Thiel agent with access to the companies agent
+# Define the Peter Thiel agent with access to the additional agents
 peter_thiel_agent = Agent(
     name="Peter Thiel (Founders Fund)",
     instructions=PETER_THIEL_PROFILE,
-    tools=[companies_agent.as_tool(
-        tool_name="companies_agent",
-        tool_description="Provides detailed company information from Octagon's database."
-    )],
+    model=OpenAIResponsesModel(model="octagon-investors-agent", openai_client=octagon_client),
+    tools=[
+        octagon_companies_agent.as_tool(
+            tool_name="octagon_companies_agent",
+            tool_description="Provides detailed company information from Octagon's database."
+        ),
+        octagon_investors_agent.as_tool(
+            tool_name="octagon_investors_agent",
+            tool_description="Provides information about other investors and their investment history."
+        ),
+        funding_info_agent.as_tool(
+            tool_name="funding_info_agent",
+            tool_description="Provides information about funding rounds and financial data."
+        ),
+    ],
 )
+
 
 # Define the response model
 class AgentResponse(BaseModel):
